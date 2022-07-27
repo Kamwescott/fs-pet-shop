@@ -14,17 +14,15 @@ const pool = new Pool({
 app.use(express.json());
 
 app.post('/pets', (req, res) =>{
-    // console.log(response.body)
-    const name = req.body.name;
-    const age = req.body.age;
-    const kind = req.body.kind; 
-    pool.query('INSERT INTO pets (name, age, kind) VALUES ($1, $2, $3)', [name, age, kind],  (err, data) =>{
+    const{name, age, kind} = req.body;
+
+    pool.query('INSERT INTO pets (name, age, kind) VALUES ($1, $2, $3) RETURNING *', [name, age, kind],  (err, data) =>{
         if (err || name === undefined || age - age != 0 || kind === undefined){
             res.status(400);
             res.set('Content-Type', 'text/plain')
             res.send('Bad Request')
         } else{
-            res.send(req.body);
+            res.send(data.rows[0]);
         }
     })
 } )
@@ -57,6 +55,25 @@ app.get('/pets/:id', (req, res) =>{
     })
 });
 
+app.patch('/pets/:id', (req, res) =>{
+    const {id} = req.params; 
+    const{name, age, kind} = req.body; 
+
+    pool.query(
+        `
+        UPDATE pets
+        SET name = COALESCE($1, name), 
+            age = COALESCE($2, age), 
+            kind = COALESCE($3, kind)
+        WHERE id = $4
+        RETURNING *
+    
+        `, [name, age, kind, id], (err, data) =>{
+            res.send(data.rows)
+        }
+    )
+
+})
 
 app.delete('/pets/:id', (req, res) =>{
     const id = parseInt(req.params.id); 
