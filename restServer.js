@@ -19,7 +19,13 @@ app.post('/pets', (req, res) =>{
     const age = req.body.age;
     const kind = req.body.kind; 
     pool.query('INSERT INTO pets (name, age, kind) VALUES ($1, $2, $3)', [name, age, kind],  (err, data) =>{
-        res.send(req.body);
+        if (err || name === undefined || age - age != 0 || kind === undefined){
+            res.status(400);
+            res.set('Content-Type', 'text/plain')
+            res.send('Bad Request')
+        } else{
+            res.send(req.body);
+        }
     })
 } )
 
