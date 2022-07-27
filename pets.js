@@ -63,4 +63,4 @@ if (subCommand === 'create'){
 //         "kind": process.argv[4], 
 //         "name": process.argv[5]
 //     }
-//}
+//}{"name":"Fido"}
